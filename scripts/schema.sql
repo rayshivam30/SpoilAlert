@@ -65,7 +65,20 @@ INSERT INTO products (name, description, price, image_url, category_id, stock_qu
 ('Cheddar Cheese', 'Sharp cheddar cheese block', 5.99, '/placeholder.svg?height=300&width=300', 3, 20, CURRENT_TIMESTAMP + INTERVAL '14 days'),
 ('Potato Chips', 'Classic salted potato chips', 2.49, '/placeholder.svg?height=300&width=300', 4, 100, CURRENT_TIMESTAMP + INTERVAL '30 days'),
 ('Orange Juice', 'Fresh squeezed orange juice', 4.49, '/placeholder.svg?height=300&width=300', 5, 35, CURRENT_TIMESTAMP + INTERVAL '5 days'),
-('Chicken Breast', 'Boneless chicken breast, 1lb', 7.99, '/placeholder.svg?height=300&width=300', 6, 15, CURRENT_TIMESTAMP + INTERVAL '2 days')
+('Chicken Breast', 'Boneless chicken breast, 1lb', 7.99, '/placeholder.svg?height=300&width=300', 6, 15, CURRENT_TIMESTAMP + INTERVAL '2 days'),
+-- Additional dummy products
+('Strawberries', 'Sweet and juicy strawberries', 3.79, '/placeholder.svg?height=300&width=300', 1, 40, CURRENT_TIMESTAMP + INTERVAL '6 days'),
+('Broccoli', 'Fresh green broccoli florets', 2.99, '/placeholder.svg?height=300&width=300', 2, 30, CURRENT_TIMESTAMP + INTERVAL '4 days'),
+('Greek Yogurt', 'Creamy Greek yogurt, plain', 4.29, '/placeholder.svg?height=300&width=300', 3, 25, CURRENT_TIMESTAMP + INTERVAL '10 days'),
+('Chocolate Cookies', 'Crunchy chocolate chip cookies', 3.59, '/placeholder.svg?height=300&width=300', 4, 60, CURRENT_TIMESTAMP + INTERVAL '20 days'),
+('Cola Drink', 'Classic cola beverage, 2L', 1.99, '/placeholder.svg?height=300&width=300', 5, 50, CURRENT_TIMESTAMP + INTERVAL '60 days'),
+('Ground Beef', 'Fresh ground beef, 1lb', 8.49, '/placeholder.svg?height=300&width=300', 6, 20, CURRENT_TIMESTAMP + INTERVAL '3 days'),
+('Mangoes', 'Tropical ripe mangoes', 5.49, '/placeholder.svg?height=300&width=300', 1, 35, CURRENT_TIMESTAMP + INTERVAL '8 days'),
+('Carrots', 'Crunchy orange carrots', 2.19, '/placeholder.svg?height=300&width=300', 2, 45, CURRENT_TIMESTAMP + INTERVAL '12 days'),
+('Butter', 'Creamy unsalted butter', 3.69, '/placeholder.svg?height=300&width=300', 3, 30, CURRENT_TIMESTAMP + INTERVAL '25 days'),
+('Nachos', 'Corn nachos with a hint of lime', 2.99, '/placeholder.svg?height=300&width=300', 4, 80, CURRENT_TIMESTAMP + INTERVAL '40 days'),
+('Apple Juice', 'Pure apple juice, no sugar added', 3.99, '/placeholder.svg?height=300&width=300', 5, 40, CURRENT_TIMESTAMP + INTERVAL '15 days'),
+('Pork Chops', 'Tender pork chops, 1lb', 9.29, '/placeholder.svg?height=300&width=300', 6, 18, CURRENT_TIMESTAMP + INTERVAL '5 days')
 ON CONFLICT DO NOTHING;
 
 -- Create admin user (password: admin123)

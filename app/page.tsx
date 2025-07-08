@@ -69,7 +69,7 @@ export default async function HomePage() {
             Quality groceries with expiry tracking for your peace of mind
           </p>
           <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100" asChild>
-            <Link href="/products">
+            <Link href={user ? "/products" : "/login"}>
               <ShoppingBag className="mr-2 h-5 w-5" />
               Start Shopping
             </Link>

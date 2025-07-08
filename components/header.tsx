@@ -9,15 +9,19 @@ import { Input } from "@/components/ui/input"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { useRouter } from "next/navigation"
+import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from "@/components/ui/drawer";
+import CartDrawerContent from "@/components/CartDrawerContent";
+import { useCartContext } from "@/components/CartProvider";
 
 interface HeaderProps {
   user?: { name: string; role: string } | null
   cartItemCount?: number
 }
 
-export function Header({ user, cartItemCount = 0 }: HeaderProps) {
+export function Header({ user }: HeaderProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const router = useRouter()
+  const { cartCount } = useCartContext();
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault()
@@ -80,17 +84,31 @@ export function Header({ user, cartItemCount = 0 }: HeaderProps) {
 
           {/* Right Side Actions */}
           <div className="flex items-center space-x-4">
-            {/* Cart */}
-            <Link href="/cart">
-              <Button variant="ghost" size="icon" className="relative">
-                <ShoppingCart className="h-5 w-5" />
-                {cartItemCount > 0 && (
-                  <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs">
-                    {cartItemCount}
-                  </Badge>
-                )}
-              </Button>
-            </Link>
+            {/* Cart Drawer */}
+            <Drawer>
+              <DrawerTrigger asChild>
+                <Button variant="ghost" size="icon" className="relative">
+                  <ShoppingCart className="h-5 w-5" />
+                  {cartCount > 0 && (
+                    <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs">
+                      {cartCount}
+                    </Badge>
+                  )}
+                </Button>
+              </DrawerTrigger>
+              <DrawerContent>
+                <DrawerHeader>
+                  <DrawerTitle>Your Cart</DrawerTitle>
+                </DrawerHeader>
+                <CartDrawerContent />
+                <DrawerFooter>
+                  <Button className="w-full" asChild>
+                    <Link href="/checkout">Place Order</Link>
+                  </Button>
+                </DrawerFooter>
+              </DrawerContent>
+            </Drawer>
+            {/* End Cart Drawer */}
 
             {/* User Menu */}
             {user ? (
