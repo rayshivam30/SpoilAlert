@@ -8,6 +8,7 @@ import { ShoppingCart, User, Search, Menu } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { useRouter } from "next/navigation"
 
 interface HeaderProps {
   user?: { name: string; role: string } | null
@@ -16,6 +17,14 @@ interface HeaderProps {
 
 export function Header({ user, cartItemCount = 0 }: HeaderProps) {
   const [searchQuery, setSearchQuery] = useState("")
+  const router = useRouter()
+
+  function handleSearch(e: React.FormEvent) {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      router.push(`/products?search=${encodeURIComponent(searchQuery)}`)
+    }
+  }
 
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" })
@@ -57,7 +66,7 @@ export function Header({ user, cartItemCount = 0 }: HeaderProps) {
 
           {/* Search Bar */}
           <div className="hidden md:flex flex-1 max-w-sm mx-6">
-            <div className="relative w-full">
+            <form onSubmit={handleSearch} className="relative w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
@@ -66,7 +75,7 @@ export function Header({ user, cartItemCount = 0 }: HeaderProps) {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
               />
-            </div>
+            </form>
           </div>
 
           {/* Right Side Actions */}

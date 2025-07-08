@@ -8,6 +8,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { ShoppingCart, AlertTriangle, Clock } from "lucide-react"
 import type { Product } from "@/lib/db"
 import { formatPrice, getExpiryStatus, formatDate } from "@/lib/utils"
+import { useState } from "react";
 
 interface ProductCardProps {
   product: Product
@@ -16,6 +17,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   const expiryStatus = getExpiryStatus(product.expiry_date)
+  const [imgSrc, setImgSrc] = useState(product.image_url || "/placeholder.jpg");
 
   const getExpiryBadge = () => {
     switch (expiryStatus) {
@@ -42,10 +44,11 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
     <Card className="group overflow-hidden transition-all hover:shadow-lg">
       <div className="relative aspect-square overflow-hidden">
         <Image
-          src={product.image_url || "/placeholder.svg?height=300&width=300"}
+          src={imgSrc}
           alt={product.name}
           fill
           className="object-cover transition-transform group-hover:scale-105"
+          onError={() => setImgSrc("/placeholder.jpg")}
         />
         <div className="absolute top-2 right-2">{getExpiryBadge()}</div>
         {product.stock_quantity === 0 && (

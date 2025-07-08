@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import { ShoppingBag, Truck, Shield, Clock } from "lucide-react"
+import FeaturedProducts from "@/components/featured-products";
 
 async function getFeaturedProducts() {
   const products = await sql`
@@ -50,6 +51,12 @@ export default async function HomePage() {
     getCartItemCount(user?.id),
   ])
 
+  const dummyImage = "/placeholder.jpg";
+  const featuredProducts = products.map((product, idx) => ({
+    ...product,
+    image_url: product.image_url || dummyImage,
+  }));
+
   return (
     <div className="min-h-screen bg-background">
       <Header user={user} cartItemCount={cartItemCount} />
@@ -61,9 +68,11 @@ export default async function HomePage() {
           <p className="text-xl md:text-2xl mb-8 opacity-90">
             Quality groceries with expiry tracking for your peace of mind
           </p>
-          <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100">
-            <ShoppingBag className="mr-2 h-5 w-5" />
-            Start Shopping
+          <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100" asChild>
+            <Link href="/products">
+              <ShoppingBag className="mr-2 h-5 w-5" />
+              Start Shopping
+            </Link>
           </Button>
         </div>
       </section>
@@ -130,18 +139,7 @@ export default async function HomePage() {
               <Link href="/products">View All Products</Link>
             </Button>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {products.map((product: any) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onAddToCart={async (productId) => {
-                  "use server"
-                  // This would be handled by a client component
-                }}
-              />
-            ))}
-          </div>
+          <FeaturedProducts products={featuredProducts} />
         </div>
       </section>
     </div>
