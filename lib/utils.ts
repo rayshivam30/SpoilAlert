@@ -38,3 +38,19 @@ export function getExpiryStatus(expiryDate: string | Date | null): "expired" | "
   if (isExpiringSoon(expiryDate)) return "expiring"
   return "fresh"
 }
+
+// Predict if a product will sell before expiry (simple rule-based)
+export function willProductSellBeforeExpiry(stock: number, avgDailySales: number, daysToExpiry: number): boolean {
+  if (avgDailySales <= 0) return false;
+  // If expected sales before expiry >= stock, it will sell
+  return avgDailySales * daysToExpiry >= stock;
+}
+
+// Suggest a dynamic discount percentage based on days to expiry and risk
+export function suggestDiscount(daysToExpiry: number, atRisk: boolean): number {
+  if (!atRisk) return 0;
+  if (daysToExpiry <= 1) return 40;
+  if (daysToExpiry <= 3) return 30;
+  if (daysToExpiry <= 7) return 20;
+  return 10;
+}

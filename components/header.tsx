@@ -12,16 +12,13 @@ import { useRouter } from "next/navigation"
 import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from "@/components/ui/drawer";
 import CartDrawerContent from "@/components/CartDrawerContent";
 import { useCartContext } from "@/components/CartProvider";
+import { useAuth } from "@/components/AuthProvider";
 
-interface HeaderProps {
-  user?: { name: string; role: string } | null
-  cartItemCount?: number
-}
-
-export function Header({ user }: HeaderProps) {
+export function Header() {
   const [searchQuery, setSearchQuery] = useState("")
   const router = useRouter()
   const { cartCount } = useCartContext();
+  const { user, refresh } = useAuth();
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault()
@@ -32,6 +29,7 @@ export function Header({ user }: HeaderProps) {
 
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" })
+    refresh()
     window.location.href = "/"
   }
 

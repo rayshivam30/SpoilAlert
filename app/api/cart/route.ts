@@ -22,8 +22,11 @@ export async function GET() {
     `
 
     return NextResponse.json({ cartItems })
-  } catch (error) {
+  } catch (error: any) {
     console.error("Get cart error:", error)
+    if (error.message === "Authentication required") {
+      return NextResponse.json({ error: "Authentication required" }, { status: 401 })
+    }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
@@ -70,8 +73,11 @@ export async function POST(request: NextRequest) {
     `
 
     return NextResponse.json({ success: true })
-  } catch (error) {
+  } catch (error: any) {
     console.error("Add to cart error:", error)
+    if (error.message === "Authentication required") {
+      return NextResponse.json({ error: "Authentication required" }, { status: 401 })
+    }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

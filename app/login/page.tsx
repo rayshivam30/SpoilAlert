@@ -11,6 +11,9 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2 } from "lucide-react"
+import { useSearchParams } from "next/navigation"
+import { useAuth } from "@/components/AuthProvider";
+import { useEffect } from "react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -18,6 +21,19 @@ export default function LoginPage() {
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams();
+  const redirect = searchParams?.get("redirect") || "/";
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      if (user.role === "admin") {
+        router.replace("/admin");
+      } else {
+        router.replace("/");
+      }
+    }
+  }, [user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -43,7 +59,7 @@ export default function LoginPage() {
       if (data.user.role === "admin") {
         router.push("/admin")
       } else {
-        router.push("/")
+        router.push(redirect)
       }
     } catch (error) {
       setError(error instanceof Error ? error.message : "An error occurred")
@@ -51,6 +67,27 @@ export default function LoginPage() {
       setIsLoading(false)
     }
   }
+
+  const handleDemoAdmin = async () => {
+    setEmail("admin@walmart.com");
+    setPassword("admin123");
+    setIsLoading(true);
+    setError("");
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: "admin@walmart.com", password: "admin123" }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Login failed");
+      router.push("/admin");
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "An error occurred");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -98,6 +135,9 @@ export default function LoginPage() {
               Sign in
             </Button>
           </form>
+          <Button variant="outline" className="w-full mt-4" onClick={handleDemoAdmin} disabled={isLoading}>
+            Demo Admin Login
+          </Button>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-muted-foreground">

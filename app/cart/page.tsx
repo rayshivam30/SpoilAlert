@@ -1,3 +1,11 @@
+import { RequireAuth } from "@/components/RequireAuth";
+import BackButton from "@/components/BackButton";
+
 export default function CartPage() {
-  return <div>Cart Page (Coming Soon)</div>;
+  return (
+    <RequireAuth>
+      <BackButton />
+      <div>Cart Page (Coming Soon)</div>
+    </RequireAuth>
+  );
 } 

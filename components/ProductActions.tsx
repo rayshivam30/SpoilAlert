@@ -6,11 +6,13 @@ import { useRouter } from "next/navigation";
 import { useCartContext } from "@/components/CartProvider";
 import CartDrawerContent from "@/components/CartDrawerContent";
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/components/AuthProvider";
 
 export default function ProductActions({ productId, disabled, product }: { productId: number, disabled: boolean, product: any }) {
   const [loading, setLoading] = React.useState(false);
   const router = useRouter();
   const { refreshCart } = useCartContext();
+  const { user } = useAuth();
 
   async function handleAddToCart() {
     setLoading(true);
@@ -21,6 +23,10 @@ export default function ProductActions({ productId, disabled, product }: { produ
         body: JSON.stringify({ productId, quantity: 1 }),
       });
       const data = await res.json();
+      if (res.status === 401 || res.status === 403 || data.error === "Authentication required") {
+        router.push("/login");
+        return;
+      }
       if (res.ok && data.success) {
         toast({ title: "Added to cart!", description: product?.name });
         refreshCart();
@@ -36,6 +42,10 @@ export default function ProductActions({ productId, disabled, product }: { produ
   }
 
   function handleBuyNow() {
+    if (!user) {
+      router.push("/login");
+      return;
+    }
     router.push(`/checkout?productId=${productId}`);
   }
 

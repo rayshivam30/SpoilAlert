@@ -20,10 +20,19 @@ export default function FeaturedProducts({ products }: { products: any[] }) {
           title: "Not logged in",
           description: "Please log in to add items to your cart.",
         });
+        window.location.href = "/login";
+        return;
+      }
+      const data = await res.json().catch(() => ({}));
+      if (data.error === "Authentication required") {
+        toast({
+          title: "Not logged in",
+          description: "Please log in to add items to your cart.",
+        });
+        window.location.href = "/login";
         return;
       }
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
         toast({
           title: "Error",
           description: data.error || "Could not add product to cart.",

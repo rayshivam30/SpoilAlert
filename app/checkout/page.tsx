@@ -3,6 +3,7 @@ import { formatPrice } from "@/lib/utils";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import CheckoutClient from "@/components/CheckoutClient";
+import { RequireAuth } from "@/components/RequireAuth";
 
 export default async function CheckoutPage({ searchParams }: { searchParams?: { productId?: string } }) {
   let items = [];
@@ -36,6 +37,8 @@ export default async function CheckoutPage({ searchParams }: { searchParams?: { 
 
   // Dummy payment state (client only)
   return (
-    <CheckoutClient items={items} total={total} />
+    <RequireAuth>
+      <CheckoutClient items={items} total={total} />
+    </RequireAuth>
   );
 } 

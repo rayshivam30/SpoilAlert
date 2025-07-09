@@ -59,7 +59,7 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header user={user} cartItemCount={cartItemCount} />
+      <Header />
 
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20">
@@ -74,6 +74,17 @@ export default async function HomePage() {
               Start Shopping
             </Link>
           </Button>
+          {(!user || user.role !== "admin") && (
+            <div className="mt-8 flex flex-col items-center">
+              <div className="bg-orange-100 text-orange-800 rounded-lg px-6 py-4 mb-4 max-w-lg text-center shadow">
+                <strong>Are you a store manager or hackathon judge?</strong><br />
+                Experience our AI-powered inventory dashboard!
+              </div>
+              <Button size="lg" variant="outline" className="text-orange-700 border-orange-400 hover:bg-orange-50" asChild>
+                <Link href="/login">Try as Admin / Manager</Link>
+              </Button>
+            </div>
+          )}
         </div>
       </section>
 

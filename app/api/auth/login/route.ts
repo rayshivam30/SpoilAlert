@@ -24,6 +24,9 @@ export async function POST(request: NextRequest) {
 
     const user = users[0]
 
+    // Debug log
+    console.log('Login attempt:', email, password, user.password);
+
     // Verify password
     const isValidPassword = await verifyPassword(password, user.password)
     if (!isValidPassword) {

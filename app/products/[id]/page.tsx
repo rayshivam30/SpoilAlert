@@ -5,6 +5,8 @@ import { Suspense } from "react";
 import Link from "next/link";
 import ProductActions from "@/components/ProductActions";
 import BackButton from "@/components/BackButton";
+import ProductInsight from "@/components/ProductInsight";
+import { getCurrentUser } from "@/lib/auth";
 
 export default async function ProductDetailsPage({ params }: { params: { id: string } }) {
   const id = params.id;
@@ -29,9 +31,13 @@ export default async function ProductDetailsPage({ params }: { params: { id: str
     SELECT * FROM products WHERE is_active = true AND category_id = ${product.category_id} AND id != ${product.id} LIMIT 10
   `;
 
+  // Fetch current user (server-side)
+  const user = await getCurrentUser();
+
   return (
     <div className="container mx-auto px-4 py-8">
       <BackButton />
+      {user?.role === "admin" && <ProductInsight product={product} />}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
         {/* Left: Images */}
         <div className="flex flex-col items-center">
