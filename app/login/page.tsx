@@ -23,17 +23,17 @@ export default function LoginPage() {
   const router = useRouter()
   const searchParams = useSearchParams();
   const redirect = searchParams?.get("redirect") || "/";
-  const { user } = useAuth();
+  const { user, refresh } = useAuth();
 
   useEffect(() => {
     if (user) {
       if (user.role === "admin") {
         router.replace("/admin");
       } else {
-        router.replace("/");
+        router.replace(redirect);
       }
     }
-  }, [user, router]);
+  }, [user, router, redirect]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -55,12 +55,10 @@ export default function LoginPage() {
         throw new Error(data.error || "Login failed")
       }
 
-      // Redirect based on user role
-      if (data.user.role === "admin") {
-        router.push("/admin")
-      } else {
-        router.push(redirect)
-      }
+      // Refresh auth context to get updated user data
+      refresh();
+      
+      // The redirect will happen in the useEffect when user state updates
     } catch (error) {
       setError(error instanceof Error ? error.message : "An error occurred")
     } finally {
@@ -81,11 +79,15 @@ export default function LoginPage() {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Login failed");
-      router.push("/admin");
+      
+      // Refresh auth context to get updated user data
+      refresh();
+      
+      // The redirect will happen in the useEffect when user state updates
     } catch (error) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
   };
 

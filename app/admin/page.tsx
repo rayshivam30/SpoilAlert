@@ -29,18 +29,21 @@ function formatDate(date: string) {
 export default function AdminDashboard() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   useEffect(() => {
-    if (!loading) {
+    if (!loading && !isRedirecting) {
       if (!user) {
-        router.replace("/login");
+        setIsRedirecting(true);
+        router.replace("/login?redirect=/admin");
       } else if (user.role !== "admin") {
+        setIsRedirecting(true);
         router.replace("/");
       }
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, isRedirecting]);
 
-  if (loading || !user || user.role !== "admin") {
+  if (loading || isRedirecting || !user || user.role !== "admin") {
     return <div className="p-8 text-center">Loading...</div>;
   }
 
@@ -124,8 +127,27 @@ export default function AdminDashboard() {
   // Bulk apply state
   const [bulkAppliedIds, setBulkAppliedIds] = React.useState<number[]>([]);
   function handleBulkApply() {
-    setBulkAppliedIds(atRiskProductIds);
-    toast({ title: "Bulk Discount Applied", description: `Applied discounts to ${atRiskProductIds.length} products.` });
+    // Apply discounts to selected products
+    setBulkAppliedIds(selectedIds);
+    
+    // Calculate total discount value for selected products
+    const selectedProducts = products.filter(p => selectedIds.includes(p.id));
+    const totalDiscountValue = selectedProducts.reduce((sum, product) => {
+      const expiryDate = product.expiry_date ? new Date(product.expiry_date) : null;
+      const daysToExpiry = expiryDate ? Math.max(0, Math.ceil((expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))) : 0;
+      const willSell = willProductSellBeforeExpiry(product.stock_quantity, avgDailySales, daysToExpiry);
+      const atRisk = !willSell;
+      const discount = suggestDiscount(daysToExpiry, atRisk);
+      return sum + (product.price * product.stock_quantity * discount) / 100;
+    }, 0);
+    
+    toast({ 
+      title: "Bulk Discount Applied", 
+      description: `Applied discounts to ${selectedIds.length} products. Total value: ${formatPrice(totalDiscountValue)}` 
+    });
+    
+    // Clear selection after applying
+    setSelectedIds([]);
   }
 
   // Bulk selection state
@@ -236,6 +258,17 @@ export default function AdminDashboard() {
       <BackButton />
       <h1 className="text-3xl font-bold mb-8">Manager Dashboard</h1>
       <AtRiskBanner />
+      
+      {/* Help Section */}
+      <div className="mb-6 p-4 bg-gray-50 rounded-lg border">
+        <h3 className="font-semibold text-gray-800 mb-2">💡 How to Apply Bulk Discounts:</h3>
+        <ol className="text-sm text-gray-600 space-y-1 list-decimal list-inside">
+          <li>Select products that need discounts using the checkboxes</li>
+          <li>Use "Select All At-Risk Products" to quickly select all expiring items</li>
+          <li>Click "Apply Discount" to apply suggested discounts to all selected products</li>
+          <li>Products with applied discounts will be highlighted in green</li>
+        </ol>
+      </div>
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
         <div className="bg-white rounded shadow p-4 text-center">
@@ -292,10 +325,54 @@ export default function AdminDashboard() {
       </div>
       {/* Bulk Actions */}
       {selectedIds.length > 0 && (
-        <div className="mb-4 flex gap-2">
-          <Button variant="default" onClick={() => openModal('donate')}>Donate ({selectedIds.length})</Button>
-          <Button variant="default" onClick={() => openModal('remove')}>Remove ({selectedIds.length})</Button>
-                      </div>
+        <div className="mb-4 flex gap-2 flex-wrap">
+          <Button variant="default" onClick={handleBulkApply} className="bg-green-600 hover:bg-green-700">
+            Apply Discount ({selectedIds.length})
+          </Button>
+          <Button variant="default" onClick={() => openModal('donate')} className="bg-blue-600 hover:bg-blue-700">
+            Donate ({selectedIds.length})
+          </Button>
+          <Button variant="default" onClick={() => openModal('remove')} className="bg-red-600 hover:bg-red-700">
+            Remove ({selectedIds.length})
+          </Button>
+        </div>
+      )}
+      
+      {/* Quick Selection */}
+      {atRiskProductIds.length > 0 && selectedIds.length === 0 && (
+        <div className="mb-4">
+          <Button 
+            variant="outline" 
+            onClick={() => handleSelectAll(true)}
+            className="border-green-500 text-green-700 hover:bg-green-50"
+          >
+            Select All At-Risk Products ({atRiskProductIds.length})
+          </Button>
+        </div>
+      )}
+      
+      {/* Selection Summary */}
+      {selectedIds.length > 0 && (
+        <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="font-medium text-blue-800">
+                {selectedIds.length} product{selectedIds.length !== 1 ? 's' : ''} selected
+              </span>
+              <span className="text-sm text-blue-600 ml-2">
+                (Click "Apply Discount" to apply suggested discounts)
+              </span>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setSelectedIds([])}
+              className="text-blue-600 border-blue-300 hover:bg-blue-100"
+            >
+              Clear Selection
+            </Button>
+          </div>
+        </div>
       )}
       {/* Confirmation Modal */}
       {modal.open && (
@@ -327,12 +404,14 @@ export default function AdminDashboard() {
           <thead>
             <tr className="bg-gray-100">
               <th className="p-3 text-left">
-                <input
-                  type="checkbox"
-                  checked={selectedIds.length === atRiskProductIds.length && atRiskProductIds.length > 0}
-                  onChange={e => handleSelectAll(e.target.checked)}
-                  aria-label="Select all"
-                />
+                {atRiskProductIds.length > 0 && (
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.length === atRiskProductIds.length && atRiskProductIds.length > 0}
+                    onChange={e => handleSelectAll(e.target.checked)}
+                    aria-label="Select all at-risk products"
+                  />
+                )}
               </th>
               <th className="p-3 text-left">Product</th>
               <th className="p-3 text-left">Stock</th>
@@ -349,8 +428,11 @@ export default function AdminDashboard() {
               const willSell = willProductSellBeforeExpiry(product.stock_quantity, avgDailySales, daysToExpiry);
               const atRisk = !willSell;
               const discount = suggestDiscount(daysToExpiry, atRisk);
+              const isBulkApplied = bulkAppliedIds.includes(product.id);
+              const isSelected = selectedIds.includes(product.id);
+              
               return (
-                <tr key={product.id} className="border-b">
+                <tr key={product.id} className={`border-b ${isSelected ? 'bg-blue-50' : ''} ${isBulkApplied ? 'bg-green-50' : ''}`}>
                   <td className="p-3">
                     {atRisk && (
                       <input
@@ -361,7 +443,12 @@ export default function AdminDashboard() {
                       />
                     )}
                   </td>
-                  <td className="p-3 font-medium">{product.name}</td>
+                  <td className="p-3 font-medium">
+                    {product.name}
+                    {isBulkApplied && (
+                      <Badge variant="secondary" className="ml-2 text-xs">Discount Applied</Badge>
+                    )}
+                  </td>
                   <td className="p-3">{product.stock_quantity}</td>
                   <td className="p-3">{product.expiry_date ? formatDate(product.expiry_date) : "-"}</td>
                   <td className="p-3">
@@ -380,7 +467,7 @@ export default function AdminDashboard() {
                   </td>
                   <td className="p-3">
                     {atRisk && discount > 0 ? (
-                      <DiscountActions productId={product.id} discount={discount} disabled={false} bulkApplied={bulkAppliedIds.includes(product.id)} />
+                      <DiscountActions productId={product.id} discount={discount} disabled={isBulkApplied} bulkApplied={isBulkApplied} />
                     ) : (
                       <span className="text-muted-foreground">-</span>
                     )}

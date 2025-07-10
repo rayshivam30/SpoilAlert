@@ -28,9 +28,15 @@ export function Header() {
   }
 
   const handleLogout = async () => {
-    await fetch("/api/auth/logout", { method: "POST" })
-    refresh()
-    window.location.href = "/"
+    try {
+      await fetch("/api/auth/logout", { method: "POST" })
+      refresh()
+      router.push("/")
+    } catch (error) {
+      console.error("Logout error:", error)
+      // Fallback to page reload if router navigation fails
+      window.location.href = "/"
+    }
   }
 
   const navigation = [

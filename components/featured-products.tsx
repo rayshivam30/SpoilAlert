@@ -2,10 +2,12 @@
 import { ProductCard } from "./product-card";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { useCartContext } from "@/components/CartProvider";
 
 export default function FeaturedProducts({ products }: { products: any[] }) {
   const { toast } = useToast();
   const [loadingId, setLoadingId] = useState<number | null>(null);
+  const { refreshCart } = useCartContext();
 
   async function handleAddToCart(productId: number) {
     setLoadingId(productId);
@@ -43,6 +45,7 @@ export default function FeaturedProducts({ products }: { products: any[] }) {
         title: "Added to cart!",
         description: "Product has been added to your cart.",
       });
+      await refreshCart();
     } catch (err) {
       toast({
         title: "Error",

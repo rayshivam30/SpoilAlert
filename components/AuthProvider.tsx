@@ -23,7 +23,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const [refreshIndex, setRefreshIndex] = useState(0);
 
-  const refresh = () => setRefreshIndex((i) => i + 1);
+  const refresh = () => {
+    setRefreshIndex((i) => i + 1);
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -45,7 +47,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider value={{ user, loading, error, refresh }}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 }
